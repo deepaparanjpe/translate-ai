@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Translator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Translate URL Content</h1>
+<form id="translateForm">
+    <label for="url">Enter URL:</label><br>
+    <input type="text" id="url" name="url" required><br><br>
+
+    <label for="target_lang">Target Language (e.g., 'es' for Spanish):</label><br>
+    <input type="text" id="target_lang" name="target_lang" required><br><br>
+
+    <input type="submit" value="Translate">
+</form>
+
+<div id="result"></div>
+
+<script>
+    document.getElementById('translateForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        const url = document.getElementById('url').value;
+        const targetLang = document.getElementById('target_lang').value;
+
+        // Prepare the request payload
+        const payload = {
+            url: url,
+            target_lang: targetLang
+        };
+
+        // Send a POST request to the Flask backend
+        fetch('http://127.0.0.1:5000/translate-url', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Display the results
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<h2>Translation Result:</h2>
+                                   <strong>Original Text:</strong> <p>${data.original_text}</p>
+                                   <strong>Translated Text:</strong> <p>${data.translated_text}</p>`;
+        })
+        .catch(error => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<h2>Error:</h2> <p>${error.message}</p>`;
+        });
+    });
+</script>
+
+</body>
+</html>
